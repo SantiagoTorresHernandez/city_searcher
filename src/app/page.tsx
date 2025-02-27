@@ -4,7 +4,6 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function Home(){
-
   type WeatherData = {
     name: string;
     weather: {description: string}[];
@@ -12,7 +11,8 @@ export default function Home(){
   }
 
   const [city, setCity] = useState("");
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+  /*const [weather, setWeather] = useState<WeatherData | null>(null);*/
+  const [weatherCards, setWeatherCards] = useState<WeatherData[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const fetchWeather = async () => {
@@ -22,10 +22,9 @@ export default function Home(){
       const response = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
       );
-      setWeather(response.data);
+      setWeatherCards((prev) => [response.data, ...prev]);
       setError(null);
     } catch (err){
-      setWeather(null);
       setError("City not found. Please try again.");
     }
   };
@@ -48,14 +47,16 @@ export default function Home(){
           Search
         </button>
       </div>
-
-      {weather && (
-        <div className="mt-6 p-4 bg-white rounded-lg shadow-lg w-64 text-center">
-          <h2 className="text-xl font-semibold">{weather?.name}</h2>
-          <p className="text-gray-700">{weather?.weather[0]?.description}</p>
-          <p className="text-2x1 font-bold">{weather?.main?.temp}°C</p>
-        </div>
-      )}
+      <div className="mt-6 flex flex-wrap gap-4 justify-center">
+        {weatherCards.map ((weather, index) => (
+          <div key={index} className="mt-6 p-4 bg-white rounded-lg shadow-lg w-64 text-center">
+            <h2 className="text-xl font-semibold">{weather?.name}</h2>
+            <p className="text-gray-700">{weather?.weather[0]?.description}</p>
+            <p className="text-2x1 font-bold">{weather?.main?.temp}°C</p>
+          </div>
+        ))}
+      </div>
+      
 
       {error && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
